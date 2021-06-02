@@ -7,9 +7,15 @@
 #include "TestUtility.h"
 #include "hashes.h"
 
+#if 1
 #define __INFO(fmt, ...)  this->debugOut("INFO",  __FUNCTION__, fmt, ##__VA_ARGS__)
 #define __ERROR(fmt, ...) this->debugOut("ERROR", __FUNCTION__, fmt, ##__VA_ARGS__)
 #define __FATAL(fmt, ...) this->debugOut("FATAL", __FUNCTION__, fmt, ##__VA_ARGS__)
+#else
+#define __INFO(fmt, ...)  printf(fmt, ##__VA_ARGS__)
+#define __ERROR(fmt, ...) printf(fmt, ##__VA_ARGS__)
+#define __FATAL(fmt, ...) printf(fmt, ##__VA_ARGS__)
+#endif
 
 #define R_CHECK() { \
 	if (res) { \
@@ -303,6 +309,7 @@ TestUtility::insertTable001(Table001 *table)
 {
 	TestMainStatus status = TestMainStatus::Ok;
 
+	__INFO("%s: start (id=%d)", __FUNCTION__, table->id);
 	const char *sql = "INSERT INTO t_test_001" \
 					   " (id, kind, contents_id, contents_code, hashed_id, terminal_value, updated_date, updated_at)" \
 					   " VALUES(?, ?, ?, ?, ?, ?, DATE(CURRENT_TIMESTAMP), DATETIME('now', 'localtime'));";
@@ -338,6 +345,7 @@ TestUtility::insertTable001(Table001 *table)
 
 END:
 	sqlite3_finalize(stmt);
+	__INFO("%s: end (id=%d)(status=%d)", __FUNCTION__, table->id, status);
 	return status;
 }
 
@@ -346,6 +354,7 @@ TestUtility::updateTable001(Table001 *table)
 {
 	TestMainStatus status = TestMainStatus::Ok;
 
+    __INFO("%s: start (id=%d)", __FUNCTION__, table->id);
 	const char *sql = "UPDATE t_test_001 SET" \
 					   " kind = ?, contents_id = ?, contents_code = ?, hashed_id = ?, terminal_value = ?," \
 					   " updated_date = DATE(CURRENT_TIMESTAMP), updated_at = DATETIME('now', 'localtime')" \
@@ -382,6 +391,7 @@ TestUtility::updateTable001(Table001 *table)
 
 END:
 	sqlite3_finalize(stmt);
+    __INFO("%s: end (id=%d)(status=%d)", __FUNCTION__, table->id, status);
 	return status;
 }
 
@@ -390,6 +400,7 @@ TestUtility::selectTable001(const int id, Table001 *output)
 {
 	TestMainStatus status = TestMainStatus::Ok;
 
+    __INFO("%s: start (id=%d)", __FUNCTION__, id);
 	char sql[1024];
 	snprintf(sql, sizeof(sql), "SELECT" \
 		" id, kind, contents_id, contents_code, hashed_id, terminal_value, updated_date, updated_at" \
@@ -438,6 +449,7 @@ TestUtility::selectTable001(const int id, Table001 *output)
 
 END:
 	sqlite3_finalize(stmt);
+    __INFO("%s: end (id=%d)(status=%d)", __FUNCTION__, id, status);
 	return status;
 }
 
@@ -447,6 +459,7 @@ TestUtility::deleteTable001(const int id)
 	TestMainStatus status = TestMainStatus::Ok;
 	int res = SQLITE_DONE;
 
+    __INFO("%s: start (id=%d)", __FUNCTION__, id);
 	char sql[1024];
 	snprintf(sql, sizeof(sql), "DELETE FROM t_test_001 WHERE id = %d;", id);
 	sqlite3_stmt *stmt = __sqlite3_prepare(sql);
@@ -459,6 +472,7 @@ TestUtility::deleteTable001(const int id)
 
 END:
 	sqlite3_finalize(stmt);
+    __INFO("%s: end (id=%d)(status=%d)", __FUNCTION__, id, status);
 	return status;
 }
 
@@ -470,6 +484,7 @@ TestUtility::insertTable002(Table002 *table, bool isTemp)
 {
 	TestMainStatus status = TestMainStatus::Ok;
 
+    __INFO("%s: start (id=%d)", __FUNCTION__, table->id);
 	char sql[1024];
 	snprintf(sql, sizeof(sql),
 			"INSERT INTO %s" \
@@ -508,6 +523,7 @@ TestUtility::insertTable002(Table002 *table, bool isTemp)
 
 END:
 	sqlite3_finalize(stmt);
+    __INFO("%s: end (id=%d)(status=%d)", __FUNCTION__, table->id, status);
 	return status;
 }
 
@@ -516,6 +532,7 @@ TestUtility::updateTable002(Table002 *table, bool isTemp)
 {
 	TestMainStatus status = TestMainStatus::Ok;
 
+    __INFO("%s: start (id=%d)", __FUNCTION__, table->id);
 	char sql[1024];
 	snprintf(sql, sizeof(sql),
 			"UPDATE %s SET" \
@@ -555,32 +572,42 @@ TestUtility::updateTable002(Table002 *table, bool isTemp)
 
 END:
 	sqlite3_finalize(stmt);
+    __INFO("%s: end (id=%d)(status=%d)", __FUNCTION__, table->id, status);
 	return status;
 }
 
 TestMainStatus
 TestUtility::selectTable002(const char *contents_code, bool isTemp, Table002 *output)
 {
+    __INFO("%s: start (cc=%s)", __FUNCTION__, contents_code);
 	char sql[1024];
 	snprintf(sql, sizeof(sql), "SELECT" \
 			" contents_code, hashed_id, id, secret, read_datetime, delete_status, updated_at" \
 			" FROM %s WHERE contents_code = '%s';",
 			isTemp ? "tmp_t_test_002" : "t_test_002", contents_code);
 
-	return this->__selectTable002UniqueRow(sql, output);
+	TestMainStatus status = this->__selectTable002UniqueRow(sql, output);
+	if (status == TestMainStatus::Ok) {
+		__INFO("%s: end (id=%d)(cc=%s)(status=%d)", __FUNCTION__, output->id, contents_code, status);
+	} else {
+		__INFO("%s: end (cc=%s)(status=%d)", __FUNCTION__, contents_code, status);
+	}
+	return status;
 }
 
 TestMainStatus
 TestUtility::selectTable002Byid(const int id, bool isTemp, Table002 *output)
 {
+    __INFO("%s: start (id=%d)", __FUNCTION__, id);
 	char sql[1024];
 	snprintf(sql, sizeof(sql), "SELECT" \
 			" contents_code, hashed_id, id, secret, read_datetime, delete_status, updated_at" \
 			" FROM %s WHERE id = '%d';",
 			isTemp ? "tmp_t_test_002" : "t_test_002", id);
 
-	__INFO("[%s]", sql);
-	return this->__selectTable002UniqueRow(sql, output);
+	TestMainStatus status = this->__selectTable002UniqueRow(sql, output);
+    __INFO("%s: end (id=%d)(status=%d)", __FUNCTION__, id, status);
+	return status;
 }
 
 TestMainStatus
@@ -590,6 +617,7 @@ TestUtility::selectAllView(Table002 **output, int *n_output)
 	*output = NULL;
 	*n_output = 0;
 
+    __INFO("%s: start", __FUNCTION__);
 	const char *sql = "SELECT" \
 					   " contents_code, hashed_id, id, secret, read_datetime, delete_status, updated_at" \
 					   " FROM v_test_002 ORDER BY id ASC;";
@@ -635,17 +663,22 @@ END:
 	}
 	*output = p;
 	*n_output = n_p;
+    __INFO("%s: end (status=%d)", __FUNCTION__, status);
 	return status;
 }
 
 TestMainStatus
 TestUtility::selectViewById(const int id, Table002 *output)
 {
+    __INFO("%s: start (id=%d)", __FUNCTION__, id);
 	char sql[1024];
 	snprintf(sql, sizeof(sql), "SELECT" \
 			" contents_code, hashed_id, id, secret, read_datetime, delete_status, updated_at" \
 			" FROM v_test_002 WHERE id = %d ORDER BY id ASC;", id);
-	return this->__selectTable002UniqueRow(sql, output);
+
+	TestMainStatus status = this->__selectTable002UniqueRow(sql, output);
+    __INFO("%s: end (id=%d)(status=%d)", __FUNCTION__, id, status);
+	return status;
 }
 
 TestMainStatus
@@ -654,6 +687,7 @@ TestUtility::deleteTable002(const int id, bool isTemp)
 	TestMainStatus status = TestMainStatus::Ok;
 	int res = SQLITE_DONE;
 
+    __INFO("%s: start (id=%d)(%s)", __FUNCTION__, id, isTemp?"temp":"none");
 	char sql[1024];
 	snprintf(sql, sizeof(sql), "DELETE FROM %s WHERE id = %d;",
 			isTemp ? "tmp_t_test_002" : "t_test_002", id);
@@ -667,6 +701,7 @@ TestUtility::deleteTable002(const int id, bool isTemp)
 
 END:
 	sqlite3_finalize(stmt);
+    __INFO("%s: end (id=%d)(%s)(status=%d)", __FUNCTION__, id, isTemp?"temp":"none", status);
 	return status;
 }
 
