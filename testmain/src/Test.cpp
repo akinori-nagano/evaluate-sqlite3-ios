@@ -106,7 +106,7 @@ END:
 }
 
 TestUtility *
-__unit_init(long tid, const const char *logDirPath, const const char *logTag)
+__unit_init(long tid, const char *logDirPath, const char *logTag)
 {
 	char buf[1024];
 	snprintf(buf, sizeof(buf), "%s%s-%ld.txt", logDirPath, logTag, tid);

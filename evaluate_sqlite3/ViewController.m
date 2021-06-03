@@ -258,14 +258,14 @@ static int test002Count = 1000;
 			{
 				NSString *tmpLogTag = [NSString stringWithFormat:@"%@Test002_01", self.logTag];
 				const char *str_logTag = [tmpLogTag UTF8String];
-				Test002_01(str_dbPath, str_logPath, str_logTag, test001Count, threadID);
+				Test002_01(str_dbPath, str_logPath, str_logTag, test002Count, threadID);
 				break;
 			}
 		case TestType_002_02:
 			{
 				NSString *tmpLogTag = [NSString stringWithFormat:@"%@Test002_02", self.logTag];
 				const char *str_logTag = [tmpLogTag UTF8String];
-				Test002_02(str_dbPath, str_logPath, str_logTag, test001Count, threadID);
+				Test002_02(str_dbPath, str_logPath, str_logTag, test002Count, threadID);
 				break;
 			}
 	 	default:
