@@ -1,0 +1,3 @@
+[submodule "dependency/evaluate-sqlite3"]
+	path = dependency/evaluate-sqlite3
+	url = https://github.com/akinori-nagano/evaluate-sqlite3.git
